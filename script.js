@@ -1,5 +1,6 @@
 let musicData = null;
 let allTracks = [];
+let selectedTrack = null;
 
 async function loadMusicData() {
     try {
@@ -56,6 +57,7 @@ function showSuggestions(matches) {
         `;
         
         item.addEventListener('click', () => {
+            selectedTrack = track;
             selectTrack(track);
             suggestionsDiv.style.display = 'none';
             document.getElementById('searchInput').value = `${track.artist} - ${track.title}`;
@@ -125,6 +127,11 @@ function escapeHtml(text) {
 }
 
 function handleSearch() {
+    if (selectedTrack) {
+        showSimilarTracks(selectedTrack);
+        return;
+    }
+    
     const input = document.getElementById('searchInput');
     const query = input.value.trim();
     
@@ -140,6 +147,7 @@ function handleSearch() {
     
     if (matches.length === 1) {
         const track = matches[0];
+        selectedTrack = track;
         selectTrack(track);
         showSimilarTracks(track);
     } else {
@@ -148,8 +156,15 @@ function handleSearch() {
         );
         
         if (exactMatch) {
+            selectedTrack = exactMatch;
             selectTrack(exactMatch);
             showSimilarTracks(exactMatch);
+        } else {
+            if (matches.length > 0) {
+                selectedTrack = matches[0];
+                selectTrack(matches[0]);
+                showSimilarTracks(matches[0]);
+            }
         }
     }
 }
@@ -161,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchButton = document.getElementById('searchButton');
     
     searchInput.addEventListener('input', (e) => {
+        selectedTrack = null;
         const query = e.target.value;
         if (query.length >= 2) {
             const matches = filterTracks(query);
